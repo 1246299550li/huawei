@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+E:/project/huawei/main.cpp
+iostream
+-
+vector
+-
+ctime
+-
+algorithm
+-
+unordered_map
+-
+fstream
+-
+
