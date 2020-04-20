@@ -119,8 +119,8 @@ void output(string &outputFile) {
 
 
 int main() {
-    string testFile = "test_data.txt";
-    string outputFile = "result.txt";
+    string testFile = "/data/test_data.txt";
+    string outputFile = "/projects/student/result.txt";
 //    auto t = clock();
     init(testFile);
     run();
