@@ -5,4 +5,5 @@
 .DS_Store
 /cmake-build-debug
 /build
+/2020HuaweiCodecraft-TestData
 huawei
