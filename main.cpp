@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <fstream>
+#include <string>
 
 using namespace std;
 
@@ -18,23 +19,26 @@ struct Path {
 
     bool operator<(const Path &rhs) const {
         if (len != rhs.len) return len < rhs.len;
-        for (int i = 0; i < len; i++) {
+        for (int i = 0; i < len; i++)
             if (path[i] != rhs.path[i])
                 return path[i] < rhs.path[i];
-        }
     }
 
 };
+
 const int maxSize = 280005;
 int G[maxSize][50];
+int Ginv[maxSize][255];
 unordered_map<unsigned int, int> idHash;
 unsigned int ids[maxSize];
 unsigned int inputs[maxSize];
 int inDegrees[maxSize] = {0};
-bool vis[maxSize] = {false};
-vector<Path> ans;
-int nodeCnt;
 int outDegrees[maxSize] = {0};
+bool vis[maxSize] = {false};
+bool isStart[maxSize] = {false};
+vector<Path> pathArr;
+int nodeCnt;
+
 int inputNum;
 
 
@@ -57,25 +61,24 @@ void init(string &testFile) {
     for (int i = 0; i < inputNum; i += 2) {
         int u = idHash[inputs[i]], v = idHash[inputs[i + 1]];
         G[u][outDegrees[u]++] = v;
-        ++inDegrees[v];
+        Ginv[v][inDegrees[v]++] = u;
     }
-
 }
 
 void dfs(int head, int cur, int depth, int path[]) {
+
     vis[cur] = true;
     path[depth - 1] = cur;
     for (int i = 0; i < outDegrees[cur]; i++) {
         int v = G[cur][i];
-        if (v == head && depth >= 3 && depth <= 7) {
+        if (isStart[v] && !vis[v] && depth >= 2 && depth < 7) {
+            path[depth] = v;
             unsigned int tmp[10];
-            for (int j = 0; j < depth; j++)
+            for (int j = 0; j <= depth; j++)
                 tmp[j] = ids[path[j]];
-
-            ans.emplace_back(Path(depth, tmp));
-
+            pathArr.emplace_back(Path(depth + 1, tmp));
         }
-        if (depth < 7 && !vis[v] && v > head) {
+        if (depth < 6 && !vis[v] && v > head) {
             dfs(head, v, depth + 1, path);
         }
     }
@@ -86,34 +89,47 @@ void solve() {
     int path[10];
     for (int i = 0; i < nodeCnt; i++) {
         if (outDegrees[i] > 0) {
+            for (int j = 0; j < inDegrees[i]; ++j) {
+                if (Ginv[i][j] > i)
+                    isStart[Ginv[i][j]] = true;
+            }
             dfs(i, i, 1, path);
+            for (int j = 0; j < inDegrees[i]; ++j) {
+                if (Ginv[i][j] > i)
+                    isStart[Ginv[i][j]] = false;
+            }
         }
     }
-    sort(ans.begin(), ans.end());
+    sort(pathArr.begin(), pathArr.end());
 }
 
 void output(string &outputFile) {
-    ofstream out(outputFile);
-    out << ans.size() << endl;
-    for (auto &x:ans) {
+
+    FILE *fp = fopen(outputFile.c_str(), "w");
+    string tmp = to_string(pathArr.size()) + "\n";
+    const char *t = tmp.c_str();
+    fwrite(t, strlen(t), 1, fp);
+    for (auto &x:pathArr) {
         auto path = x.path;
-        out << path[0];
+        string str = to_string(path[0]);
         for (int i = 1; i < x.len; i++)
-            out << "," << path[i];
-        out << endl;
+            str += "," + to_string(path[i]);
+        str += "\n";
+        const char *p = str.c_str();
+        fwrite(p, strlen(p), 1, fp);
     }
+    fclose(fp);
 }
 
 
 int main() {
-    string testFile = "test_data.txt";
+    string testFile = "test_data2.txt";
     string outputFile = "output.txt";
-
     auto t = clock();
     init(testFile);
     solve();
     output(outputFile);
-    cout << " time : " << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
+    cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
     return 0;
 }
 
