@@ -5,14 +5,16 @@
 #include <unordered_map>
 #include <fstream>
 #include <string>
+#include <cstring>
 
 using namespace std;
 
 struct Path {
     int len;
-    unsigned int path[10];
+    unsigned int path[10]{};
 
-    Path(int len, unsigned int *p) : len(len) {
+    Path(int length, const unsigned int *p) {
+        len = length;
         for (int i = 0; i < 10; i++)
             path[i] = p[i];
     }
@@ -27,15 +29,15 @@ struct Path {
 };
 
 const int maxSize = 280005;
-int G[maxSize][50];
-int Ginv[maxSize][255];
+int G[maxSize][260];
+int Ginv[maxSize][260];
 unordered_map<unsigned int, int> idHash;
 unsigned int ids[maxSize];
 unsigned int inputs[maxSize];
 int inDegrees[maxSize] = {0};
 int outDegrees[maxSize] = {0};
 bool vis[maxSize] = {false};
-bool isStart[maxSize] = {false};
+int isValid[maxSize];
 vector<Path> pathArr;
 int nodeNum;
 int inputNum;
@@ -59,7 +61,31 @@ void init(string &testFile) {
         G[s][outDegrees[s]++] = t;
         Ginv[t][inDegrees[t]++] = s;
     }
+    memset(isValid, -1, sizeof(isValid));
+}
 
+void dfs_range1(int head, int cur, int len) {
+    for (int i = 0; i < outDegrees[cur]; ++i) {
+        int v = G[cur][i];
+        if (v < head || vis[v])continue;
+        isValid[v] = head;
+        if (len >= 3)continue;
+        vis[v] = true;
+        dfs_range1(head, v, len + 1);
+        vis[v] = false;
+    }
+}
+
+void dfs_range2(int head, int cur, int len) {
+    for (int i = 0; i < inDegrees[cur]; ++i) {
+        int v = Ginv[cur][i];
+        if (v < head || vis[v])continue;
+        isValid[v] = head;
+        if (len >= 3)continue;
+        vis[v] = true;
+        dfs_range2(head, v, len + 1);
+        vis[v] = false;
+    }
 }
 
 void dfs(int head, int cur, int len, int path[]) {
@@ -67,14 +93,15 @@ void dfs(int head, int cur, int len, int path[]) {
     path[len - 1] = cur;
     for (int i = 0; i < outDegrees[cur]; i++) {
         int v = G[cur][i];
-        if (isStart[v] && !vis[v] && len >= 2 && len < 7) {
+        if (v < head || (isValid[v] != head && isValid[v] != -2)) continue;
+        if (isValid[v] == -2 && !vis[v] && len >= 2) {
             path[len] = v;
             unsigned int tmp[10];
             for (int j = 0; j <= len; j++)
                 tmp[j] = ids[path[j]];
             pathArr.emplace_back(Path(len + 1, tmp));
         }
-        if (len < 6 && !vis[v] && v > head) {
+        if (len < 6 && !vis[v]) {
             dfs(head, v, len + 1, path);
         }
     }
@@ -83,16 +110,20 @@ void dfs(int head, int cur, int len, int path[]) {
 
 void run() {
     int path[10];
-    for (int i = 0; i < nodeNum; i++) {
-        if (outDegrees[i] > 0) {
+    for (int i = 0; i < nodeNum; ++i) {
+        if (outDegrees[i] > 0 && inDegrees[i] > 0) {
+            dfs_range1(i, i, 1);
+            dfs_range2(i, i, 1);
             for (int j = 0; j < inDegrees[i]; ++j) {
                 if (Ginv[i][j] > i)
-                    isStart[Ginv[i][j]] = true;
+                    isValid[Ginv[i][j]] = -2;
             }
+
             dfs(i, i, 1, path);
+
             for (int j = 0; j < inDegrees[i]; ++j) {
                 if (Ginv[i][j] > i)
-                    isStart[Ginv[i][j]] = false;
+                    isValid[Ginv[i][j]] = -1;
             }
         }
     }
@@ -119,13 +150,13 @@ void output(string &outputFile) {
 
 
 int main() {
-    string testFile = "/data/test_data.txt";
-    string outputFile = "/projects/student/result.txt";
-//    auto t = clock();
+    string testFile = "../data/test_data.txt";
+    string outputFile = "../projects/student/result.txt";
+    auto t = clock();
     init(testFile);
     run();
     output(outputFile);
-//    cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
+    cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
     return 0;
 }
 
