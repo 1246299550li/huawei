@@ -37,57 +37,53 @@ int outDegrees[maxSize] = {0};
 bool vis[maxSize] = {false};
 bool isStart[maxSize] = {false};
 vector<Path> pathArr;
-int nodeCnt;
-
+int nodeNum;
 int inputNum;
 
 
 void init(string &testFile) {
     FILE *file = fopen(testFile.c_str(), "r");
-
-    unsigned int u, v, c;
-    while (fscanf(file, "%u,%u,%u", &u, &v, &c) != EOF) {
+    unsigned int u, v, value;
+    while (fscanf(file, "%u,%u,%u", &u, &v, &value) != EOF) {
         inputs[inputNum++] = u;
         inputs[inputNum++] = v;
     }
     copy(begin(inputs), end(inputs), begin(ids));
     sort(ids, ids + inputNum);
-    nodeCnt = unique(ids, ids + inputNum) - ids;
-
-    for (int i = 0; i < nodeCnt; i++) {
-
+    nodeNum = unique(ids, ids + inputNum) - ids;
+    for (int i = 0; i < nodeNum; i++) {
         idHash[ids[i]] = i;
     }
     for (int i = 0; i < inputNum; i += 2) {
-        int u = idHash[inputs[i]], v = idHash[inputs[i + 1]];
-        G[u][outDegrees[u]++] = v;
-        Ginv[v][inDegrees[v]++] = u;
+        int s = idHash[inputs[i]], t = idHash[inputs[i + 1]];
+        G[s][outDegrees[s]++] = t;
+        Ginv[t][inDegrees[t]++] = s;
     }
+
 }
 
-void dfs(int head, int cur, int depth, int path[]) {
-
+void dfs(int head, int cur, int len, int path[]) {
     vis[cur] = true;
-    path[depth - 1] = cur;
+    path[len - 1] = cur;
     for (int i = 0; i < outDegrees[cur]; i++) {
         int v = G[cur][i];
-        if (isStart[v] && !vis[v] && depth >= 2 && depth < 7) {
-            path[depth] = v;
+        if (isStart[v] && !vis[v] && len >= 2 && len < 7) {
+            path[len] = v;
             unsigned int tmp[10];
-            for (int j = 0; j <= depth; j++)
+            for (int j = 0; j <= len; j++)
                 tmp[j] = ids[path[j]];
-            pathArr.emplace_back(Path(depth + 1, tmp));
+            pathArr.emplace_back(Path(len + 1, tmp));
         }
-        if (depth < 6 && !vis[v] && v > head) {
-            dfs(head, v, depth + 1, path);
+        if (len < 6 && !vis[v] && v > head) {
+            dfs(head, v, len + 1, path);
         }
     }
     vis[cur] = false;
 }
 
-void solve() {
+void run() {
     int path[10];
-    for (int i = 0; i < nodeCnt; i++) {
+    for (int i = 0; i < nodeNum; i++) {
         if (outDegrees[i] > 0) {
             for (int j = 0; j < inDegrees[i]; ++j) {
                 if (Ginv[i][j] > i)
@@ -123,13 +119,13 @@ void output(string &outputFile) {
 
 
 int main() {
-    string testFile = "test_data2.txt";
-    string outputFile = "output.txt";
-    auto t = clock();
+    string testFile = "test_data.txt";
+    string outputFile = "result.txt";
+//    auto t = clock();
     init(testFile);
-    solve();
+    run();
     output(outputFile);
-    cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
+//    cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
     return 0;
 }
 
