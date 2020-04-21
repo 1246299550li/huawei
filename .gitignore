@@ -1,9 +1,7 @@
-/CMakeFiles
-/*.cmake
-/CMakeCache.txt
-/Makefile
-.DS_Store
-/cmake-build-debug
-/build
-/2020HuaweiCodecraft-TestData
-huawei
+#
+*
+!CMakeLists.txt
+!/main.cpp
+!.gitignore
+!/data
+!/projects

@@ -22,12 +22,13 @@ struct Path {
     }
 
     bool operator<(const Path &rhs) const {
-        if (len != rhs.len)
-            return len < rhs.len;
-        for (int i = 0; i < len; i++)
-            if (path[i] != rhs.path[i])
-                return path[i] < rhs.path[i];
-        return false;
+        if (len == rhs.len)
+        {
+            for (int i = 0; i < len; i++)
+                if (path[i] != rhs.path[i])
+                    return path[i] < rhs.path[i];
+        }
+        return len < rhs.len;
     }
 
 };
@@ -61,7 +62,7 @@ int nodeNum;
 void init(string &testFile) {
     auto t = clock();
 
-    FILE *file = fopen(testFile.c_str(), "r");
+    FILE *file = fopen(testFile.c_str(), "r+");
     unsigned int u, v, value;
     while (fscanf(file, "%u,%u,%u", &u, &v, &value) != EOF) {
         inputs[inputNum++] = u;
@@ -155,7 +156,7 @@ void run() {
             }
         }
     }
-    sort(pathArr,pathArr+pathIdx - 1);
+    sort(pathArr,pathArr+pathIdx);
 }
 
 void output(string &outputFile) {
