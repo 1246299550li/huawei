@@ -32,7 +32,7 @@ struct Path {
 
 };
 
-const int maxSize = 580000;
+const int maxSize = 580005;
 const int pathNum = 1500000;
 
 int G[maxSize][260];
