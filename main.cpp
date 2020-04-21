@@ -10,9 +10,11 @@
 using namespace std;
 
 struct Path {
-    int len;
+    int len{};
     unsigned int path[10]{};
-
+    
+    explicit Path() = default;
+    
     Path(int length, const unsigned int *p) {
         len = length;
         for (int i = 0; i < 10; i++)
@@ -25,11 +27,13 @@ struct Path {
         for (int i = 0; i < len; i++)
             if (path[i] != rhs.path[i])
                 return path[i] < rhs.path[i];
+        return false;
     }
 
 };
 
 const int maxSize = 580000;
+const int pathNum = 1500000;
 
 int G[maxSize][260];
 int Ginv[maxSize][260];
@@ -45,7 +49,11 @@ int outDegrees[maxSize] = {0};
 bool vis[maxSize] = {false};
 
 int isValid[maxSize];
-vector<Path> pathArr;
+//vector<Path> pathArr;
+Path pathArr[1500000];
+int pathIdx = 0;
+
+
 int nodeNum;
 
 
@@ -115,7 +123,7 @@ void dfs(int head, int cur, int len, int path[]) {
             unsigned int tmp[10];
             for (int j = 0; j <= len; j++)
                 tmp[j] = ids[path[j]];
-            pathArr.emplace_back(Path(len + 1, tmp));
+            pathArr[pathIdx++] = (Path(len + 1, tmp));
         }
         if (len < 6 && !vis[v]) {
             dfs(head, v, len + 1, path);
@@ -147,13 +155,13 @@ void run() {
             }
         }
     }
-    sort(pathArr.begin(), pathArr.end());
+    sort(pathArr,pathArr+pathIdx - 1);
 }
 
 void output(string &outputFile) {
 
     FILE *fp = fopen(outputFile.c_str(), "w");
-    string tmp = to_string(pathArr.size()) + "\n";
+    string tmp = to_string(pathIdx) + "\n";
     const char *t = tmp.c_str();
     fwrite(t, strlen(t), 1, fp);
     for (auto &x:pathArr) {
