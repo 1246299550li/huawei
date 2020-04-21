@@ -156,7 +156,7 @@ void output(string &outputFile) {
     string tmp = to_string(pathIdx) + "\n";
     const char *t = tmp.c_str();
     fwrite(t, strlen(t), 1, fp);
-    for (int j = 0; j < pathNum; j++) {
+    for (int j = 0; j < pathIdx; j++) {
         auto x = pathArr[j];
         auto path = x.path;
         string str = to_string(path[0]);
