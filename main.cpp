@@ -12,9 +12,9 @@ using namespace std;
 struct Path {
     int len{};
     unsigned int path[10]{};
-    
+
     explicit Path() = default;
-    
+
     Path(int length, const unsigned int *p) {
         len = length;
         for (int i = 0; i < 10; i++)
@@ -22,8 +22,7 @@ struct Path {
     }
 
     bool operator<(const Path &rhs) const {
-        if (len == rhs.len)
-        {
+        if (len == rhs.len) {
             for (int i = 0; i < len; i++)
                 if (path[i] != rhs.path[i])
                     return path[i] < rhs.path[i];
@@ -50,30 +49,25 @@ int outDegrees[maxSize] = {0};
 bool vis[maxSize] = {false};
 
 int isValid[maxSize];
-//vector<Path> pathArr;
-Path pathArr[1500000];
+Path pathArr[pathNum];
 int pathIdx = 0;
 
 
 int nodeNum;
 
 
-
 void init(string &testFile) {
-    auto t = clock();
-
-    FILE *file = fopen(testFile.c_str(), "r+");
+    FILE *file = fopen(testFile.c_str(), "r");
     unsigned int u, v, value;
     while (fscanf(file, "%u,%u,%u", &u, &v, &value) != EOF) {
         inputs[inputNum++] = u;
         inputs[inputNum++] = v;
     }
-    
+
     // card No -> id
     copy(begin(inputs), end(inputs), begin(ids));
     sort(ids, ids + inputNum);
     nodeNum = unique(ids, ids + inputNum) - ids;
-    
     for (int i = 0; i < nodeNum; i++) {
         idHash[ids[i]] = i;
     }
@@ -83,13 +77,10 @@ void init(string &testFile) {
         Ginv[t][inDegrees[t]++] = s;
     }
     memset(isValid, -1, sizeof(isValid));
-    
-    cout << "init cost:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
-    
 }
 
 void dfs_range1(int head, int cur, int len) {
-    
+
     for (int i = 0; i < outDegrees[cur]; ++i) {
         int v = G[cur][i];
         if (v < head || vis[v])continue;
@@ -140,15 +131,15 @@ void run() {
             //find 3 neighbor
             dfs_range1(i, i, 1);
             dfs_range2(i, i, 1);
-            
+
             /*6+1 opt*/
             for (int j = 0; j < inDegrees[i]; ++j) {
                 if (Ginv[i][j] > i)
                     isValid[Ginv[i][j]] = -2; // mark the last 2nd p
             }
-            
+
             dfs(i, i, 1, path);
-    
+
             /*6+1 opt*/
             for (int j = 0; j < inDegrees[i]; ++j) {
                 if (Ginv[i][j] > i)
@@ -156,7 +147,7 @@ void run() {
             }
         }
     }
-    sort(pathArr,pathArr+pathIdx);
+    sort(pathArr, pathArr + pathIdx);
 }
 
 void output(string &outputFile) {
@@ -165,7 +156,8 @@ void output(string &outputFile) {
     string tmp = to_string(pathIdx) + "\n";
     const char *t = tmp.c_str();
     fwrite(t, strlen(t), 1, fp);
-    for (auto &x:pathArr) {
+    for (int j = 0; j < pathNum; j++) {
+        auto x = pathArr[j];
         auto path = x.path;
         string str = to_string(path[0]);
         for (int i = 1; i < x.len; i++)
@@ -179,8 +171,8 @@ void output(string &outputFile) {
 
 
 int main() {
-    string testFile = "../2020HuaweiCodecraft-TestData/1004812/test_data.txt";
-    string outputFile = "../result.txt";
+    string testFile = "../data/test_data.txt";
+    string outputFile = "../projects/student/result.txt";
     auto t = clock();
     init(testFile);
     run();
