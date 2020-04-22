@@ -3,10 +3,12 @@
 #include <ctime>
 #include <algorithm>
 #include <unordered_map>
+#include <cmath>
 #include <fstream>
 #include <string>
 #include <thread>
 #include <mutex>
+#include <cmath>
 #include <cstring>
 
 using namespace std;
@@ -35,7 +37,7 @@ struct Path {
 };
 const int threadNum = 6;
 const int maxSize = 580000;
-const int pathNum = 1000000;
+
 
 int G[maxSize][260];
 int Ginv[maxSize][260];
@@ -66,7 +68,7 @@ void init(string &testFile) {
     copy(begin(inputs), end(inputs), begin(ids));
     sort(ids, ids + inputNum);
     nodeNum = unique(ids, ids + inputNum) - ids;
-    cout<<nodeNum;
+   // cout<<nodeNum;
     for (int i = 0; i < nodeNum; i++) {
         idHash[ids[i]] = i;
     }
@@ -75,7 +77,7 @@ void init(string &testFile) {
         G[s][outDegrees[s]++] = t;
         Ginv[t][inDegrees[t]++] = s;
     }
-    cout << "init cost:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
+  //  cout << "init cost:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
     
 }
 
@@ -177,7 +179,7 @@ public:
         auto t = clock();
         findLoop(begin,end);
 
-        cout << "time in thread " <<flag<<":"<< double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
+    //    cout << "time in thread " <<flag<<":"<< double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
     }
 };
 
@@ -209,7 +211,7 @@ float fibRatio(int a)
 
 int main() {
 
-    string testFile = "../2020HuaweiCodecraft-TestData/3512444/test_data.txt";
+    string testFile = "../2020HuaweiCodecraft-TestData/1004812/test_data.txt";
     string outputFile = "../result.txt";
     auto t = clock();
     init(testFile);
@@ -237,7 +239,7 @@ int main() {
     for(int i =0;i<threadNum;i++)
     {
         threads[i] = thread(&SolutionThread::run,&s[i],p,q);
-        cout<<"thread "<<i<<":"<<"["<<p<<","<<q<<")"<<endl;
+     //   cout<<"thread "<<i<<":"<<"["<<p<<","<<q<<")"<<endl;
         p = q;
         q = int(nodeNum /(exp(threadNum) - 1 ) * (exp(i+2)-1)+0.5);
     }
@@ -258,7 +260,7 @@ int main() {
     {
         threads[i].join();
     }
-    cout << "thread finished:" << double(clock() - t1) / CLOCKS_PER_SEC << "s" << endl;
+  //  cout << "thread finished:" << double(clock() - t1) / CLOCKS_PER_SEC << "s" << endl;
     
     Path *pp = paths;
     int pathN=0;
@@ -283,7 +285,9 @@ int main() {
      */
      
     cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
+   
     return 0;
+
 }
 
 
