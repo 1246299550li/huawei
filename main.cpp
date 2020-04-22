@@ -10,6 +10,11 @@
 #include <mutex>
 #include <cmath>
 #include <cstring>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 using namespace std;
 
@@ -53,33 +58,72 @@ int outDegrees[maxSize] = {0};
 Path pathArr[threadNum][3000000];
 Path paths[4000000];
 int nodeNum;
-
-void init(string &testFile) {
-    auto t = clock();
-
-    FILE *file = fopen(testFile.c_str(), "r+");
-    unsigned int u, v, value;
-    while (fscanf(file, "%u,%u,%u", &u, &v, &value) != EOF) {
-        inputs[inputNum++] = u;
-        inputs[inputNum++] = v;
+void next(const char* buf, int& len, unsigned int& u, unsigned int& v){
+    const char* tmp = buf + len;
+    u = 0;
+    v = 0;
+    while(*tmp && (*tmp != ',' && *tmp != 0x0d && *tmp != 0x0a && *tmp != '\n')){
+        u += u * 10 + (*tmp - '0');
+        ++tmp;
     }
+    if (*tmp == ',') {
+        ++tmp;
+        while (*tmp != ',') {
+            v += v * 10 + (*tmp - '0');
+            ++tmp;
+        }
+        ++tmp;
+        while (*tmp != 0x0d && *tmp != 0x0a && *tmp != '\n') {
+            ++tmp;
+        }
+        len = tmp - buf + 1;
+    } else{
+        len = -1;
+    }
+}
+
+void init(string &testFile)
+{
+    // FILE *file = fopen(testFile.c_str(), "r");
+    unsigned int u, v, value;
+    // while (fscanf(file, "%u,%u,%u", &u, &v, &value) != EOF) {
+    //     inputs[inputNum++] = u;
+    //     inputs[inputNum++] = v;
+    // }
     
+    //next 3 functions needs <sys/types.h>,<sys/stat.h>,<sys/mman.h>,<fcntl.h>,<unistd.h>
+    int fd = open(testFile.c_str(), O_RDONLY);   //function open() needs <sys/types.h>,<sys/stat.h>,<fcntl.h>
+    int len = lseek(fd, 0, SEEK_END);             //function lseek() needs <unistd.h>,<fcntl.h>
+    char *buf = (char *) mmap(NULL, len, PROT_READ, MAP_PRIVATE, fd, 0);//function mmap() needs <sys/mman.h>,<unistd.h>
+    int offset = 0;
+    while (true)
+    {
+        next(buf, offset, u, v);
+        if (offset != -1)
+        {
+            inputs[inputNum++] = u;
+            inputs[inputNum++] = v;
+        } else
+        {
+            break;
+        }
+    }
     // card No -> id
     copy(begin(inputs), end(inputs), begin(ids));
     sort(ids, ids + inputNum);
     nodeNum = unique(ids, ids + inputNum) - ids;
-   // cout<<nodeNum;
-    for (int i = 0; i < nodeNum; i++) {
+    for (int i = 0; i < nodeNum; i++)
+    {
         idHash[ids[i]] = i;
     }
-    for (int i = 0; i < inputNum; i += 2) {
+    for (int i = 0; i < inputNum; i += 2)
+    {
         int s = idHash[inputs[i]], t = idHash[inputs[i + 1]];
         G[s][outDegrees[s]++] = t;
         Ginv[t][inDegrees[t]++] = s;
     }
-  //  cout << "init cost:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
-    
 }
+
 
 class SolutionThread
 {
@@ -233,7 +277,6 @@ int main() {
     }
     
    */
-    
     int p = 0;
     int q = int(nodeNum /(exp(threadNum) - 1 )* (exp(1)-1) + 0.5);
     for(int i =0;i<threadNum;i++)
