@@ -33,7 +33,7 @@ struct Path {
     }
 
 };
-const int threadNum = 8;
+const int threadNum = 6;
 const int maxSize = 580000;
 const int pathNum = 1000000;
 
@@ -48,8 +48,8 @@ int inputNum;
 int inDegrees[maxSize] = {0};
 int outDegrees[maxSize] = {0};
 
-Path pathArr[threadNum][1000000];
-Path paths[1200000];
+Path pathArr[threadNum][3000000];
+Path paths[4000000];
 int nodeNum;
 
 void init(string &testFile) {
@@ -66,7 +66,7 @@ void init(string &testFile) {
     copy(begin(inputs), end(inputs), begin(ids));
     sort(ids, ids + inputNum);
     nodeNum = unique(ids, ids + inputNum) - ids;
-    
+    cout<<nodeNum;
     for (int i = 0; i < nodeNum; i++) {
         idHash[ids[i]] = i;
     }
@@ -176,7 +176,7 @@ public:
     void run(int begin,int end) {
         auto t = clock();
         findLoop(begin,end);
-        cout<<"thread "<<flag<<":"<<"["<<begin<<","<<end<<")"<<endl;
+
         cout << "time in thread " <<flag<<":"<< double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
     }
 };
@@ -198,12 +198,18 @@ void output(string &outputFile,int pathIdx,Path *pathArr) {
     }
     fclose(fp);
 }
-
+float fibRatio(int a)
+{
+    //assert(a<threadNum);
+    float fib[9] = {0,1,2,3,5,8,13,21,34};
+    float sum[9] = {0,1,3,6,11,19,32,53,87};
+    return fib[a]/sum[threadNum];
+}
 
 
 int main() {
 
-    string testFile = "../2020HuaweiCodecraft-TestData/1004812/test_data.txt";
+    string testFile = "../2020HuaweiCodecraft-TestData/3512444/test_data.txt";
     string outputFile = "../result.txt";
     auto t = clock();
     init(testFile);
@@ -213,26 +219,38 @@ int main() {
     
     auto t1 = clock();
     vector<thread> threads(threadNum);
-   
-    int p = 0;
-    int q = nodeNum /(exp(threadNum) - 1 )* (exp(1)-1);
+    /*
+    int p = int(fibRatio(0)*nodeNum+0.5);
+    int q = int(fibRatio(1)*nodeNum+0.5);
     for(int i =0;i<threadNum;i++)
     {
         threads[i] = thread(&SolutionThread::run,&s[i],p,q);
-
+        cout<<"thread "<<i<<":"<<"["<<p<<","<<q<<")"<<endl;
         p = q;
-        q = nodeNum /(exp(threadNum) - 1 ) * (exp(i+2)-1);
+        q = p +int(fibRatio(i+2)*nodeNum+0.5);
     }
     
-    /*
+   */
+    
     int p = 0;
-    int q = nodeNum /threadNum;
+    int q = int(nodeNum /(exp(threadNum) - 1 )* (exp(1)-1) + 0.5);
     for(int i =0;i<threadNum;i++)
     {
         threads[i] = thread(&SolutionThread::run,&s[i],p,q);
+        cout<<"thread "<<i<<":"<<"["<<p<<","<<q<<")"<<endl;
         p = q;
-        q = (i+2)*nodeNum /threadNum;
+        q = int(nodeNum /(exp(threadNum) - 1 ) * (exp(i+2)-1)+0.5);
     }
+    /*
+   int p = 0;
+   int q = nodeNum /threadNum;
+   for(int i =0;i<threadNum;i++)
+   {
+       threads[i] = thread(&SolutionThread::run,&s[i],p,q);
+       cout<<"thread "<<i<<":"<<"["<<p<<","<<q<<")"<<endl;
+       p = q;
+       q = (i+2)*nodeNum /threadNum;
+   }
     */
     
     
