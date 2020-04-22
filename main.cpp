@@ -33,10 +33,10 @@ struct Path {
 };
 
 const int maxSize = 580005;
-const int pathNum = 1500000;
+const int pathNum = 3000005;
 
-int G[maxSize][260];
-int Ginv[maxSize][260];
+int G[maxSize][100];
+int Ginv[maxSize][100];
 
 unordered_map<unsigned int, int> idHash; // card No -> id
 unsigned int ids[maxSize]; //id -> card No
@@ -175,7 +175,9 @@ int main() {
     string outputFile = "../projects/student/result.txt";
     auto t = clock();
     init(testFile);
+    cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
     run();
+    cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
     output(outputFile);
     cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
     return 0;
