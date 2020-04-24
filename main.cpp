@@ -164,11 +164,11 @@ void run() {
         }
     }
 
-    sort(cycle3, cycle3 + cycleNum[3]);
-    sort(cycle4, cycle4 + cycleNum[4]);
-    sort(cycle5, cycle5 + cycleNum[5]);
-    sort(cycle6, cycle6 + cycleNum[6]);
-    sort(cycle7, cycle7 + cycleNum[7]);
+//    sort(cycle3, cycle3 + cycleNum[3]);
+//    sort(cycle4, cycle4 + cycleNum[4]);
+//    sort(cycle5, cycle5 + cycleNum[5]);
+//    sort(cycle6, cycle6 + cycleNum[6]);
+//    sort(cycle7, cycle7 + cycleNum[7]);
 
 }
 
@@ -176,6 +176,7 @@ void output(string &outputFile) {
     int ansNum = 0;
     for (int k = 3; k <= 7; ++k) {
         ansNum += cycleNum[k];
+        cout << cycleNum[k] << endl;
     }
 
     FILE *fp = fopen(outputFile.c_str(), "w");
