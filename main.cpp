@@ -164,8 +164,11 @@ void run() {
         }
     }
 
-
-//    sort(pathArr, pathArr + pathIdx);
+    sort(cycle3, cycle3 + cycleNum[3]);
+    sort(cycle4, cycle4 + cycleNum[4]);
+    sort(cycle5, cycle5 + cycleNum[5]);
+    sort(cycle6, cycle6 + cycleNum[6]);
+    sort(cycle7, cycle7 + cycleNum[7]);
 
 }
 
