@@ -6,13 +6,17 @@
 #include <fstream>
 #include <string>
 #include <cstring>
-
+//#include <sys/types.h>
+//#include <sys/stat.h>
+//#include <sys/mman.h>
+//#include <fcntl.h>
+//#include <unistd.h>
 using namespace std;
 
 const int maxSize = 580005;
 
-int G[maxSize][100];
-int Ginv[maxSize][100];
+int G[maxSize][60];
+int Ginv[maxSize][60];
 
 unordered_map<int, int> idHash; // card No -> id
 int ids[maxSize]; //id -> card No
@@ -49,6 +53,29 @@ int cycleNum[10] = {0};
 int out = 0;
 
 vector<unordered_map<int, vector<int>>> pre(maxSize);
+//void next(const char* buf, int& len, unsigned int& u, unsigned int& v){
+//    const char* tmp = buf + len;
+//    u = 0;
+//    v = 0;
+//    while(*tmp && (*tmp != ',' && *tmp != 0x0d && *tmp != 0x0a && *tmp != '\n')){
+//        u = u * 10 + (*tmp - '0');
+//        ++tmp;
+//    }
+//    if (*tmp == ',') {
+//        ++tmp;
+//        while (*tmp != ',') {
+//            v = v * 10 + (*tmp - '0');
+//            ++tmp;
+//        }
+//        ++tmp;
+//        while (*tmp != 0x0d && *tmp != 0x0a && *tmp != '\n') {
+//            ++tmp;
+//        }
+//        len = tmp - buf + 1;
+//    } else{
+//        len = -1;
+//    }
+//}
 
 int bucketSort(int *begin, const int *end) {
     int *p = begin;
@@ -75,6 +102,20 @@ void init(string &testFile) {
         inputs[inputNum++] = u;
         inputs[inputNum++] = v;
     }
+//    unsigned int u, v;
+//    int fd = open(testFile.c_str(),O_RDONLY);
+//    int len = lseek(fd,0,SEEK_END);
+//    char *buf = (char *) mmap(NULL,len,PROT_READ,MAP_PRIVATE,fd,0);
+//    int offset = 0;
+//    while (true){
+//        next(buf, offset, u, v);
+//        if (offset != -1){
+//            inputs[inputNum++] = u;
+//            inputs[inputNum++] = v;
+//        } else{
+//            break;
+//        }
+//    }
 
     // card No -> id
     copy(begin(inputs), end(inputs), begin(ids));
@@ -139,9 +180,10 @@ void dfs(int head, int cur, int len, int path[]) {
                     path[len] = v;
                     path[len + 1] = x;
                     for (int j = 0; j < len + 2; ++j) {
-                        cycle[len - 1][cycleNum[len + 2]++].cycle[j] = ids[path[j]];
+                        cycle[len - 1][cycleNum[len + 2]].cycle[j] = ids[path[j]];
                     }
-                    out++;
+                    ++cycleNum[len + 2];
+                    ++out;
                 }
             }
         }
@@ -164,11 +206,11 @@ void run() {
         }
     }
 
-//    sort(cycle3, cycle3 + cycleNum[3]);
-//    sort(cycle4, cycle4 + cycleNum[4]);
-//    sort(cycle5, cycle5 + cycleNum[5]);
-//    sort(cycle6, cycle6 + cycleNum[6]);
-//    sort(cycle7, cycle7 + cycleNum[7]);
+    sort(cycle3, cycle3 + cycleNum[3]);
+    sort(cycle4, cycle4 + cycleNum[4]);
+    sort(cycle5, cycle5 + cycleNum[5]);
+    sort(cycle6, cycle6 + cycleNum[6]);
+    sort(cycle7, cycle7 + cycleNum[7]);
 
 }
 
@@ -176,24 +218,25 @@ void output(string &outputFile) {
     int ansNum = 0;
     for (int k = 3; k <= 7; ++k) {
         ansNum += cycleNum[k];
-        cout << cycleNum[k] << endl;
     }
 
     FILE *fp = fopen(outputFile.c_str(), "w");
     string tmp = to_string(ansNum) + "\n";
     const char *t = tmp.c_str();
     fwrite(t, strlen(t), 1, fp);
-//    for (int i = 3; i <= 7; ++i) {
-//        for (int j = 0; j < cycleNum[i]; ++j) {
-//            string str = to_string(cycle[i - 3][j].cycle[0]);
-//            for (int k = 0; k < i; ++k) {
-//                str += "," + to_string(cycle[i - 3][j].cycle[k]);
-//            }
-//            str += "\n";
-//            const char *p = str.c_str();
-//            fwrite(p, strlen(p), 1, fp);
-//        }
-//    }
+    string ans;
+    for (int i = 3; i <= 7; ++i) {
+        for (int j = 0; j < cycleNum[i]; ++j) {
+            string str = to_string(cycle[i - 3][j].cycle[0]);
+            for (int k = 1; k < i; ++k) {
+                str += "," + to_string(cycle[i - 3][j].cycle[k]);
+            }
+            str += "\n";
+            ans += str;
+        }
+    }
+    const char *p = ans.c_str();
+    fwrite(p, strlen(p), 1, fp);
     fclose(fp);
 }
 
@@ -202,20 +245,14 @@ int main() {
     string outputFile = "../projects/student/result.txt";
     auto t = clock();
     init(testFile);
-    cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
-    t = clock();
+//    cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
+//    t = clock();
     run();
-    cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
-    t = clock();
+//    cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
+//    t = clock();
     output(outputFile);
     cout << "time:" << double(clock() - t) / CLOCKS_PER_SEC << "s" << endl;
     cout << out << endl;
     return 0;
 }
-
-
-
-
-
-
 
