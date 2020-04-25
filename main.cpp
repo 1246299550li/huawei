@@ -18,9 +18,9 @@ const int maxSize = 280005;
 int G[maxSize][60];
 int Ginv[maxSize][60];
 
-int idHash[280005]; // card No -> id
-unsigned int ids[560000]; //id -> card No
-unsigned int inputs[560000];
+int idHash[maxSize]; // card No -> id
+unsigned int ids[maxSize * 2]; //id -> card No
+unsigned int inputs[maxSize * 2];
 int inputNum;
 int nodeNum;
 
@@ -28,7 +28,7 @@ int inDegrees[maxSize] = {0};
 int outDegrees[maxSize] = {0};
 
 bool vis[maxSize] = {false};
-int isValid[maxSize];
+int isValid[maxSize] = {0};
 int isTail[maxSize] = {0};
 
 char cycle3[30 * 500000];
@@ -85,8 +85,7 @@ int bucketSort(unsigned int *begin, const unsigned int *end) {
 }
 
 void init(string &inputFile) {
-    memset(isValid, -1, sizeof(isValid));
-    pre.resize(maxSize);
+
     FILE *file = fopen(inputFile.c_str(), "r");
     unsigned int u, v, value;
     while (fscanf(file, "%u,%u,%u", &u, &v, &value) != EOF) {
@@ -125,25 +124,27 @@ void init(string &inputFile) {
         sort(G[j], G[j] + outDegrees[j]);
         sort(Ginv[j], Ginv[j] + inDegrees[j]);
     }
+    pre.resize(maxSize);
 }
 
 void dfs_range1(int head, int cur, int len) {
+    vis[cur] = true;
     for (int i = 0; i < outDegrees[cur]; ++i) {
         int &v = G[cur][i];
         if (v < head || vis[v])continue;
-        isValid[v] = head;
+        isValid[v] = head + 100;
         if (len >= 3)continue;
-        vis[v] = true;
         dfs_range1(head, v, len + 1);
-        vis[v] = false;
     }
+    vis[cur] = false;
 }
 
 void dfs_range2(int head, int cur, int len) {
+    vis[cur] = true;
     for (int i = 0; i < inDegrees[cur]; ++i) {
         int &v = Ginv[cur][i];
         if (v < head || vis[v])continue;
-        isValid[v] = head;
+        isValid[v] = head + 100;
         if (len == 2) {
             isTail[v] = -100 - head;
             if (pre[head].find(v) == pre[head].end()) {
@@ -154,10 +155,9 @@ void dfs_range2(int head, int cur, int len) {
             }
         }
         if (len >= 3)continue;
-        vis[v] = true;
         dfs_range2(head, v, len + 1);
-        vis[v] = false;
     }
+    vis[cur] = false;
 }
 
 void dfs(int head, int cur, int len, int path[]) {
@@ -165,7 +165,7 @@ void dfs(int head, int cur, int len, int path[]) {
     path[len - 1] = cur;
     for (int i = 0; i < outDegrees[cur]; ++i) {
         int &v = G[cur][i];
-        if (isValid[v] != head || vis[v])continue;
+        if (isValid[v] != (head + 100) || vis[v])continue;
         if (isTail[v] == (-100 - head)) {
             for (auto &x :pre[head][v]) {
                 if (!vis[x]) {
@@ -193,13 +193,10 @@ void dfs(int head, int cur, int len, int path[]) {
 void run() {
     int path[16];
     for (int i = 0; i < nodeNum; ++i) {
-        if (outDegrees[i] > 0 && inDegrees[i] > 0) {
-            vis[i] = true;
-            dfs_range1(i, i, 1);
-            dfs_range2(i, i, 1);
-            vis[i] = false;
-            dfs(i, i, 1, path);
-        }
+        if (outDegrees[i] < 1 || inDegrees[i] < 1)continue;
+        dfs_range1(i, i, 1);
+        dfs_range2(i, i, 1);
+        dfs(i, i, 1, path);
     }
 }
 
